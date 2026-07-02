@@ -1,0 +1,127 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python -m recsys.pipelines.download
+    deps:
+    - path: src/recsys/pipelines/download.py
+      hash: md5
+      md5: 15721a59fbb8923965a4e077f1aad064
+      size: 651
+    params:
+      configs/params.yaml:
+        data.dataset_url: 
+          https://files.grouplens.org/datasets/movielens/ml-100k.zip
+        data.raw_dir: data/raw
+    outs:
+    - path: data/raw/ml-100k
+      hash: md5
+      md5: 33e3b98f41ab1289116f74de90b95a24.dir
+      size: 16100896
+      nfiles: 23
+  preprocess:
+    cmd: python -m recsys.pipelines.preprocess
+    deps:
+    - path: data/raw/ml-100k
+      hash: md5
+      md5: 33e3b98f41ab1289116f74de90b95a24.dir
+      size: 16100896
+      nfiles: 23
+    - path: src/recsys/pipelines/preprocess.py
+      hash: md5
+      md5: 316f98906534f7640dddef3111025038
+      size: 1180
+    params:
+      configs/params.yaml:
+        data.min_item_interactions: 5
+        data.min_user_interactions: 5
+        data.processed_dir: data/processed
+        seed: 42
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 4e1a6a53aa079d69cac102899be873ad.dir
+      size: 436258
+      nfiles: 2
+  build_features:
+    cmd: python -m recsys.pipelines.build_features
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 4e1a6a53aa079d69cac102899be873ad.dir
+      size: 436258
+      nfiles: 2
+    - path: src/recsys/pipelines/build_features.py
+      hash: md5
+      md5: 0e0a72e0b792f75c351605a6048fd3b6
+      size: 1870
+    params:
+      configs/params.yaml:
+        data.features_dir: data/features
+        features:
+          test_size: 0.2
+          val_size: 0.1
+          negative_ratio: 4
+        seed: 42
+    outs:
+    - path: data/features
+      hash: md5
+      md5: 07996d23b2f24d23db7302a4e111cbcc.dir
+      size: 303967
+      nfiles: 3
+  train:
+    cmd: python -m recsys.pipelines.train
+    deps:
+    - path: data/features
+      hash: md5
+      md5: 07996d23b2f24d23db7302a4e111cbcc.dir
+      size: 303967
+      nfiles: 3
+    - path: src/recsys/pipelines/train.py
+      hash: md5
+      md5: 43f3b86293f27799c75fe747250ee7a3
+      size: 3756
+    params:
+      configs/params.yaml:
+        seed: 42
+        train:
+          model_type: embedding_mlp
+          embedding_dim: 32
+          hidden_dims:
+          - 64
+          - 32
+          dropout: 0.2
+          learning_rate: 0.001
+          batch_size: 1024
+          epochs: 20
+          patience: 3
+          weight_decay: 0.0001
+    outs:
+    - path: models/model.pt
+      hash: md5
+      md5: e9c6c7b9e0d346742b8dcb20b9ca8c46
+      size: 277745
+  evaluate:
+    cmd: python -m recsys.pipelines.evaluate
+    deps:
+    - path: data/features
+      hash: md5
+      md5: 07996d23b2f24d23db7302a4e111cbcc.dir
+      size: 303967
+      nfiles: 3
+    - path: models/model.pt
+      hash: md5
+      md5: e9c6c7b9e0d346742b8dcb20b9ca8c46
+      size: 277745
+    - path: src/recsys/pipelines/evaluate.py
+      hash: md5
+      md5: ccd385f4535b05147f69a7b0ce64f584
+      size: 3931
+    params:
+      configs/params.yaml:
+        evaluate:
+          top_k: 10
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 229b77fb24416a8c14d59d7ec2c57a1d
+      size: 686
