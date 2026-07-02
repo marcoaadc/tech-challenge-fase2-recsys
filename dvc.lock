@@ -78,19 +78,19 @@ stages:
       nfiles: 3
     - path: src/recsys/pipelines/train.py
       hash: md5
-      md5: 43f3b86293f27799c75fe747250ee7a3
-      size: 3756
+      md5: 05265ea7e1157890eb82d9877a479384
+      size: 3815
     params:
       configs/params.yaml:
         seed: 42
         train:
           model_type: embedding_mlp
-          embedding_dim: 32
+          embedding_dim: 64
           hidden_dims:
+          - 128
           - 64
-          - 32
           dropout: 0.2
-          learning_rate: 0.001
+          learning_rate: 0.005
           batch_size: 1024
           epochs: 20
           patience: 3
@@ -98,8 +98,8 @@ stages:
     outs:
     - path: models/model.pt
       hash: md5
-      md5: e9c6c7b9e0d346742b8dcb20b9ca8c46
-      size: 277745
+      md5: 5319e92419d46e81e80008773cfd0d0e
+      size: 601073
   evaluate:
     cmd: python -m recsys.pipelines.evaluate
     deps:
@@ -110,12 +110,12 @@ stages:
       nfiles: 3
     - path: models/model.pt
       hash: md5
-      md5: e9c6c7b9e0d346742b8dcb20b9ca8c46
-      size: 277745
+      md5: 5319e92419d46e81e80008773cfd0d0e
+      size: 601073
     - path: src/recsys/pipelines/evaluate.py
       hash: md5
-      md5: ccd385f4535b05147f69a7b0ce64f584
-      size: 3931
+      md5: bed64783987422adebe562b43ef1bacb
+      size: 3898
     params:
       configs/params.yaml:
         evaluate:
@@ -123,5 +123,5 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 229b77fb24416a8c14d59d7ec2c57a1d
-      size: 686
+      md5: 01329fc8c1b4517cf6c3287adad946a6
+      size: 671
