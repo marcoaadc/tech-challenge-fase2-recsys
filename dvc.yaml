@@ -1,0 +1,67 @@
+# DVC pipeline — Tech Challenge FIAP Fase 02 (sistema de recomendacao)
+# Reproduza tudo com: dvc repro
+# Params ficam em configs/params.yaml (arquivo custom, referenciado por stage).
+
+stages:
+  download:
+    cmd: python -m recsys.pipelines.download
+    deps:
+      - src/recsys/pipelines/download.py
+    params:
+      - configs/params.yaml:
+          - data.dataset_url
+          - data.raw_dir
+    outs:
+      - data/raw/ml-100k
+
+  preprocess:
+    cmd: python -m recsys.pipelines.preprocess
+    deps:
+      - src/recsys/pipelines/preprocess.py
+      - data/raw/ml-100k
+    params:
+      - configs/params.yaml:
+          - seed
+          - data.processed_dir
+          - data.min_user_interactions
+          - data.min_item_interactions
+    outs:
+      - data/processed
+
+  build_features:
+    cmd: python -m recsys.pipelines.build_features
+    deps:
+      - src/recsys/pipelines/build_features.py
+      - data/processed
+    params:
+      - configs/params.yaml:
+          - seed
+          - data.features_dir
+          - features
+    outs:
+      - data/features
+
+  train:
+    cmd: python -m recsys.pipelines.train
+    deps:
+      - src/recsys/pipelines/train.py
+      - data/features
+    params:
+      - configs/params.yaml:
+          - seed
+          - train
+    outs:
+      - models/model.pt
+
+  evaluate:
+    cmd: python -m recsys.pipelines.evaluate
+    deps:
+      - src/recsys/pipelines/evaluate.py
+      - models/model.pt
+      - data/features
+    params:
+      - configs/params.yaml:
+          - evaluate
+    metrics:
+      - reports/metrics.json:
+          cache: false
