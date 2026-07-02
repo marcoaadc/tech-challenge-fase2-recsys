@@ -75,6 +75,7 @@ def _run_training(params: Params, settings: Settings) -> float:
     model_path = Path(settings.models_dir) / "model.pt"
     save_checkpoint(model, params.train, n_users, n_items, model_path)
     mlflow.log_artifact(str(model_path))
+    mlflow.pytorch.log_model(model, artifact_path="model")
     return float(result["best_val_metric"])
 
 
