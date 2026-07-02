@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+from scipy.sparse import csr_matrix
+from sklearn.neighbors import NearestNeighbors
 
 from recsys.models.base import Recommender
 
@@ -47,28 +48,50 @@ class PopularityRecommender(Recommender):
         return self._popularity
 
 
-class LogisticRegressionRecommender(Recommender):
-    """Baseline de regressao logistica sobre atributos de frequencia de usuario e item."""
+class ItemKnnRecommender(Recommender):
+    """Baseline de filtragem colaborativa item-based com similaridade coseno kNN."""
 
-    def __init__(self, n_users: int, n_items: int) -> None:
+    def __init__(self, n_users: int, n_items: int, n_neighbors: int = 50) -> None:
         """Inicializa o recomendador.
 
         Args:
             n_users: Numero total de usuarios.
             n_items: Numero total de itens.
+            n_neighbors: Quantidade de vizinhos mais proximos por item.
         """
         self.n_users = n_users
         self.n_items = n_items
-        self._model = LogisticRegression(max_iter=1000)
-        self._user_activity = np.zeros(n_users, dtype=np.float64)
-        self._item_popularity = np.zeros(n_items, dtype=np.float64)
+        self.n_neighbors = n_neighbors
+        self._interactions = csr_matrix((n_users, n_items), dtype=np.float64)
+        self._similarity = csr_matrix((n_items, n_items), dtype=np.float64)
 
-    def _features(self, users: np.ndarray, items: np.ndarray) -> np.ndarray:
-        """Monta a matriz de atributos ``[atividade_usuario, popularidade_item]``."""
-        return np.column_stack([self._user_activity[users], self._item_popularity[items]])
+    def _build_interactions(self, train: pd.DataFrame) -> csr_matrix:
+        """Monta a matriz esparsa usuario-item a partir dos positivos de treino."""
+        positives = train[train["label"] == 1]
+        rows = positives["user_idx"].to_numpy()
+        cols = positives["item_idx"].to_numpy()
+        data = np.ones(rows.shape[0], dtype=np.float64)
+        return csr_matrix((data, (rows, cols)), shape=(self.n_users, self.n_items))
 
-    def fit(self, train: pd.DataFrame) -> LogisticRegressionRecommender:
-        """Ajusta a regressao logistica usando positivos e negativos de treino.
+    def _to_similarity(self, distances: np.ndarray, indices: np.ndarray) -> csr_matrix:
+        """Converte distancias/indices dos vizinhos numa matriz esparsa de similaridade."""
+        rows = np.repeat(np.arange(self.n_items), indices.shape[1])
+        sims = np.nan_to_num(1.0 - distances.ravel(), nan=0.0)
+        similarity = csr_matrix((sims, (rows, indices.ravel())), shape=(self.n_items, self.n_items))
+        similarity.setdiag(0.0)
+        similarity.eliminate_zeros()
+        return similarity
+
+    def _fit_similarity(self, interactions: csr_matrix) -> csr_matrix:
+        """Calcula a similaridade coseno item-item retendo apenas os ``n_neighbors``."""
+        item_vectors = interactions.T.tocsr()
+        k = min(self.n_neighbors + 1, self.n_items)
+        knn = NearestNeighbors(n_neighbors=k, metric="cosine").fit(item_vectors)
+        distances, indices = knn.kneighbors(item_vectors)
+        return self._to_similarity(distances, indices)
+
+    def fit(self, train: pd.DataFrame) -> ItemKnnRecommender:
+        """Constroi a matriz de interacoes e a similaridade item-item.
 
         Args:
             train: DataFrame com ``user_idx, item_idx, label``.
@@ -76,15 +99,12 @@ class LogisticRegressionRecommender(Recommender):
         Returns:
             A propria instancia treinada.
         """
-        positives = train[train["label"] == 1]
-        self._user_activity = _count_by_index(positives["user_idx"], self.n_users)
-        self._item_popularity = _count_by_index(positives["item_idx"], self.n_items)
-        features = self._features(train["user_idx"].to_numpy(), train["item_idx"].to_numpy())
-        self._model.fit(features, train["label"].to_numpy())
+        self._interactions = self._build_interactions(train)
+        self._similarity = self._fit_similarity(self._interactions)
         return self
 
     def score(self, user_idx: int) -> np.ndarray:
-        """Pontua todos os itens para ``user_idx`` via probabilidade da classe positiva."""
-        items = np.arange(self.n_items)
-        users = np.full(self.n_items, user_idx)
-        return self._model.predict_proba(self._features(users, items))[:, 1]
+        """Pontua itens somando as similaridades com o historico do ``user_idx``."""
+        history = self._interactions.getrow(user_idx)
+        scores = history.dot(self._similarity)
+        return np.asarray(scores.todense()).ravel()

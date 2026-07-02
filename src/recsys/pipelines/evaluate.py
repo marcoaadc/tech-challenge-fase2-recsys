@@ -19,7 +19,7 @@ from recsys.config.settings import Params, Settings, load_params
 from recsys.evaluation.evaluator import TorchRecommender, evaluate_recommender
 from recsys.features.build_features import positives_by_user
 from recsys.models.base import Recommender
-from recsys.models.baselines import LogisticRegressionRecommender, PopularityRecommender
+from recsys.models.baselines import ItemKnnRecommender, PopularityRecommender
 from recsys.models.persistence import load_checkpoint
 from recsys.utils.seed import set_seed
 
@@ -40,7 +40,7 @@ def _build_recommenders(
     return {
         model_name: TorchRecommender(model, n_items),  # type: ignore[arg-type]
         "popularity": PopularityRecommender(n_items).fit(train),
-        "logistic_regression": LogisticRegressionRecommender(n_users, n_items).fit(train),
+        "item_knn": ItemKnnRecommender(n_users, n_items).fit(train),
     }
 
 
