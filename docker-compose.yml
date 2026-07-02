@@ -1,0 +1,49 @@
+# Orquestracao local: MLflow tracking server + pipeline de treino.
+#
+#   docker compose up mlflow      # apenas o tracking server (UI em http://localhost:5000)
+#   docker compose up train       # roda o pipeline completo apontando para o MLflow
+#
+# O servico `train` encadeia os 5 CLIs diretamente em vez de `dvc repro`:
+# `dvc repro` exigiria um repositorio git+dvc inicializado dentro do container,
+# enquanto os CLIs sao autossuficientes e produzem os mesmos artefatos.
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.14.1
+    container_name: recsys-mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    restart: unless-stopped
+
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: recsys-train
+    depends_on:
+      - mlflow
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT_NAME: recsys-ecommerce
+      SEED: "42"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+    command: >
+      sh -c "python -m recsys.pipelines.download &&
+             python -m recsys.pipelines.preprocess &&
+             python -m recsys.pipelines.build_features &&
+             python -m recsys.pipelines.train &&
+             python -m recsys.pipelines.evaluate"
+
+volumes:
+  mlflow-data:
