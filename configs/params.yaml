@@ -1,0 +1,28 @@
+seed: 42
+
+data:
+  dataset_url: https://files.grouplens.org/datasets/movielens/ml-100k.zip
+  raw_dir: data/raw
+  processed_dir: data/processed
+  features_dir: data/features
+  min_user_interactions: 5
+  min_item_interactions: 5
+
+features:
+  test_size: 0.2
+  val_size: 0.1
+  negative_ratio: 4
+
+train:
+  model_type: embedding_mlp
+  embedding_dim: 32
+  hidden_dims: [64, 32]
+  dropout: 0.2
+  learning_rate: 0.001
+  batch_size: 1024
+  epochs: 20
+  patience: 3
+  weight_decay: 0.0001
+
+evaluate:
+  top_k: 10
