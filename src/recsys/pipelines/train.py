@@ -10,7 +10,10 @@ import logging
 from pathlib import Path
 
 import mlflow
+import numpy as np
 import pandas as pd
+from mlflow.models import ModelSignature
+from mlflow.types import Schema, TensorSpec
 
 from recsys.config.settings import Params, Settings, TrainConfig, load_params
 from recsys.evaluation.evaluator import TorchRecommender, evaluate_recommender
@@ -61,6 +64,18 @@ def _setup_mlflow(settings: Settings) -> None:
     mlflow.set_experiment(settings.mlflow_experiment_name)
 
 
+def _model_signature() -> ModelSignature:
+    """Descreve os tensores de entrada e saida do modelo para o Model Registry."""
+    inputs = Schema(
+        [
+            TensorSpec(np.dtype("int64"), (-1,), "user_idx"),
+            TensorSpec(np.dtype("int64"), (-1,), "item_idx"),
+        ]
+    )
+    outputs = Schema([TensorSpec(np.dtype("float32"), (-1,))])
+    return ModelSignature(inputs=inputs, outputs=outputs)
+
+
 def _run_training(params: Params, settings: Settings) -> float:
     """Constroi os artefatos, treina o modelo e salva o checkpoint; retorna a metrica."""
     features_dir = Path(params.data.features_dir)
@@ -75,7 +90,7 @@ def _run_training(params: Params, settings: Settings) -> float:
     model_path = Path(settings.models_dir) / "model.pt"
     save_checkpoint(model, params.train, n_users, n_items, model_path)
     mlflow.log_artifact(str(model_path))
-    mlflow.pytorch.log_model(model, artifact_path="model")
+    mlflow.pytorch.log_model(model, artifact_path="model", signature=_model_signature())
     return float(result["best_val_metric"])
 
 

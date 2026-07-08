@@ -78,8 +78,8 @@ stages:
       nfiles: 3
     - path: src/recsys/pipelines/train.py
       hash: md5
-      md5: 05265ea7e1157890eb82d9877a479384
-      size: 3815
+      md5: 0796392a3d34755c269604e2866867e5
+      size: 4368
     params:
       configs/params.yaml:
         seed: 42
