@@ -39,9 +39,7 @@ def test_all_interactions_strategy_mantem_tudo() -> None:
 
 def test_reindex_ids_gera_indices_contiguos() -> None:
     """Ids originais sao mapeados para inteiros contiguos comecando em zero."""
-    interactions = pd.DataFrame(
-        {"user_id": [5, 5, 9], "item_id": [10, 40, 40], "timestamp": [1, 2, 3]}
-    )
+    interactions = pd.DataFrame({"user_id": [5, 5, 9], "item_id": [10, 40, 40], "timestamp": [1, 2, 3]})
     reindexed, mappings = reindex_ids(interactions)
     assert list(reindexed.columns) == ["user_idx", "item_idx", "timestamp"]
     assert mappings.n_users == 2

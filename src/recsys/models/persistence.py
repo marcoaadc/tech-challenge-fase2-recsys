@@ -17,9 +17,7 @@ def _architecture(params: TrainConfig) -> dict[str, Any]:
     return {"embedding_dim": params.embedding_dim, "hidden_dims": params.hidden_dims, "dropout": params.dropout}
 
 
-def save_checkpoint(
-    model: nn.Module, params: TrainConfig, n_users: int, n_items: int, path: Path | str
-) -> None:
+def save_checkpoint(model: nn.Module, params: TrainConfig, n_users: int, n_items: int, path: Path | str) -> None:
     """Salva o estado do modelo junto com os metadados necessarios para recria-lo.
 
     Args:

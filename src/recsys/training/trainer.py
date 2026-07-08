@@ -68,9 +68,7 @@ class Trainer:
         self.validate_fn = validate_fn
         self.device = device
         self.criterion = nn.BCEWithLogitsLoss()
-        self.optimizer = torch.optim.Adam(
-            model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
-        )
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
 
     def _step(self, users: torch.Tensor, items: torch.Tensor, labels: torch.Tensor) -> float:
         """Executa um passo de otimizacao e retorna a perda do lote."""

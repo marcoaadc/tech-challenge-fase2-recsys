@@ -14,9 +14,7 @@ from recsys.features.build_features import (
 
 def _sequential_interactions(n: int) -> pd.DataFrame:
     """Cria ``n`` interacoes de um unico usuario com timestamps crescentes."""
-    return pd.DataFrame(
-        {"user_idx": [0] * n, "item_idx": list(range(n)), "timestamp": list(range(n))}
-    )
+    return pd.DataFrame({"user_idx": [0] * n, "item_idx": list(range(n)), "timestamp": list(range(n))})
 
 
 def test_temporal_split_respeita_ordem_cronologica() -> None:

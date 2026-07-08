@@ -1,6 +1,9 @@
 # Instale com: poetry run pre-commit install
 # Rode manualmente: poetry run pre-commit run --all-files
 
+# Artefatos gerados pelo pipeline ficam fora dos fixers para nao invalidar os hashes do DVC.
+exclude: ^(reports/|data/|models/|mlruns/|dvc\.lock|poetry\.lock)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -12,7 +15,7 @@ repos:
         args: ["--maxkb=1024"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.7
+    rev: v0.15.20
     hooks:
       - id: ruff
         args: ["--fix"]
