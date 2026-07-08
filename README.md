@@ -62,7 +62,8 @@ techallenger2/
 ├── data/                      # Gerenciado pelo DVC (raw → processed → features)
 ├── docs/
 │   ├── model_card.md          # Model Card do modelo em produção
-│   └── video_star.md          # Roteiro STAR do vídeo de apresentação
+│   ├── ml_canvas.md           # ML Canvas: enquadramento de negócio da solução
+│   └── monitoring_plan.md     # Plano de monitoramento e playbooks de resposta
 ├── models/                    # model.pt (saída do stage train)
 ├── reports/                   # metrics.json (saída do stage evaluate)
 ├── scripts/
@@ -220,12 +221,13 @@ Hooks de **pre-commit** configurados (`.pre-commit-config.yaml`) rodam o ruff an
 | Gestão de dependências | Poetry com `poetry.lock` commitado |
 | Configuração e segredos | `pydantic-settings` + `.env` (`.env.example` no repo) |
 | Qualidade de código | `ruff` + `pre-commit` + `pytest` (22 testes) |
-| Documentação | Este README, [Model Card](docs/model_card.md), [roteiro do vídeo](docs/video_star.md) |
+| Documentação | Este README, [Model Card](docs/model_card.md), [ML Canvas](docs/ml_canvas.md), [Plano de Monitoramento](docs/monitoring_plan.md) |
 
 ## 14. Documentação adicional
 
 - [Model Card](docs/model_card.md) — detalhes do modelo, uso pretendido, limitações e considerações éticas.
-- [Roteiro do vídeo (STAR)](docs/video_star.md) — apresentação de 5 minutos do projeto.
+- [ML Canvas](docs/ml_canvas.md) — enquadramento de negócio: problema, proposta de valor, dados, métricas e riscos.
+- [Plano de Monitoramento](docs/monitoring_plan.md) — métricas em produção, alertas, detecção de drift e playbooks de resposta.
 
 ---
 
