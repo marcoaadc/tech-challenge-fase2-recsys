@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela runs antigos do mesmo branch quando um novo push chega
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      - name: Instalar dependências
+        run: poetry install --no-interaction
+
+      - name: Ruff (lint)
+        run: poetry run ruff check .
+
+      - name: Pytest
+        run: poetry run pytest -q
+
+  docker:
+    name: Build da imagem Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # O torch para Linux traz dependências CUDA pesadas; libera espaço no runner
+      - name: Liberar espaço em disco
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Validar docker-compose
+        run: docker compose config -q
+
+      - name: Build multi-stage
+        run: docker build -t recsys:ci .
+
+      - name: Smoke test da imagem
+        run: docker run --rm recsys:ci python -c "import recsys, torch; print('imagem OK, torch', torch.__version__)"
