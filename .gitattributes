@@ -1,0 +1,3 @@
+# LF em todos os checkouts (Windows incluso): os hashes do DVC dependem do
+# conteudo dos arquivos, e line endings divergentes invalidariam o dvc.lock.
+* text=auto eol=lf
