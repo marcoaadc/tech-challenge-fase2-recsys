@@ -3,6 +3,10 @@ stages:
   download:
     cmd: python -m recsys.pipelines.download
     deps:
+    - path: src/recsys/data/download.py
+      hash: md5
+      md5: 01a5023897ccc78a12c876030b8c03a1
+      size: 1461
     - path: src/recsys/pipelines/download.py
       hash: md5
       md5: 15721a59fbb8923965a4e077f1aad064
@@ -26,6 +30,10 @@ stages:
       md5: 33e3b98f41ab1289116f74de90b95a24.dir
       size: 16100896
       nfiles: 23
+    - path: src/recsys/data/preprocess.py
+      hash: md5
+      md5: 2a5975f3d1a51be19500a973cbdc22a6
+      size: 5901
     - path: src/recsys/pipelines/preprocess.py
       hash: md5
       md5: 316f98906534f7640dddef3111025038
@@ -50,6 +58,10 @@ stages:
       md5: 4e1a6a53aa079d69cac102899be873ad.dir
       size: 436258
       nfiles: 2
+    - path: src/recsys/features/build_features.py
+      hash: md5
+      md5: f7f2cf385032dce4a717d9a49e53e60a
+      size: 6669
     - path: src/recsys/pipelines/build_features.py
       hash: md5
       md5: 0e0a72e0b792f75c351605a6048fd3b6
@@ -76,10 +88,39 @@ stages:
       md5: 07996d23b2f24d23db7302a4e111cbcc.dir
       size: 303967
       nfiles: 3
+    - path: data/processed
+      hash: md5
+      md5: 4e1a6a53aa079d69cac102899be873ad.dir
+      size: 436258
+      nfiles: 2
+    - path: src/recsys/evaluation
+      hash: md5
+      md5: 1192c310c9afd947dbc5f3f5f83f4a37.dir
+      size: 15134
+      nfiles: 6
+    - path: src/recsys/features/build_features.py
+      hash: md5
+      md5: f7f2cf385032dce4a717d9a49e53e60a
+      size: 6669
+    - path: src/recsys/models
+      hash: md5
+      md5: 757f2d1e0fea3bd62c72b6278c2f7720.dir
+      size: 27230
+      nfiles: 12
     - path: src/recsys/pipelines/train.py
       hash: md5
       md5: 0796392a3d34755c269604e2866867e5
       size: 4368
+    - path: src/recsys/training
+      hash: md5
+      md5: 7ae23f092c9065a3d17f9d0637ae3c00.dir
+      size: 12160
+      nfiles: 6
+    - path: src/recsys/utils
+      hash: md5
+      md5: 88f67778a31b2c183378459882b97206.dir
+      size: 1881
+      nfiles: 4
     params:
       configs/params.yaml:
         seed: 42
@@ -108,10 +149,29 @@ stages:
       md5: 07996d23b2f24d23db7302a4e111cbcc.dir
       size: 303967
       nfiles: 3
+    - path: data/processed
+      hash: md5
+      md5: 4e1a6a53aa079d69cac102899be873ad.dir
+      size: 436258
+      nfiles: 2
     - path: models/model.pt
       hash: md5
       md5: 5319e92419d46e81e80008773cfd0d0e
       size: 601073
+    - path: src/recsys/evaluation
+      hash: md5
+      md5: 1192c310c9afd947dbc5f3f5f83f4a37.dir
+      size: 15134
+      nfiles: 6
+    - path: src/recsys/features/build_features.py
+      hash: md5
+      md5: f7f2cf385032dce4a717d9a49e53e60a
+      size: 6669
+    - path: src/recsys/models
+      hash: md5
+      md5: 839640a0ad3489b4934f117abdfe8b02.dir
+      size: 27230
+      nfiles: 12
     - path: src/recsys/pipelines/evaluate.py
       hash: md5
       md5: bed64783987422adebe562b43ef1bacb

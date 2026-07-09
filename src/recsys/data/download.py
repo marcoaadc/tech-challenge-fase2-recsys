@@ -46,4 +46,5 @@ def download_dataset(url: str, raw_dir: Path | str) -> Path:
     zip_path = raw_path / "ml-100k.zip"
     _download_file(url, zip_path)
     _extract_zip(zip_path, raw_path)
+    zip_path.unlink()
     return raw_path / _DATA_FILE
