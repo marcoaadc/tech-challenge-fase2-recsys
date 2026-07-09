@@ -40,12 +40,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # O torch para Linux traz dependências CUDA pesadas; libera espaço no runner
-      - name: Liberar espaço em disco
-        run: |
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
-
       - name: Validar docker-compose
         run: docker compose config -q
 
