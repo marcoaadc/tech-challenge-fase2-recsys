@@ -125,6 +125,8 @@ make pipeline           # encadeia os 5 CLIs: python -m recsys.pipelines.<stage>
 
 Os dados versionados usam um **remote DVC local** em `../dvc-storage-recsys` (`dvc push` / `dvc pull`).
 
+> **Nota sobre plataformas:** as métricas reportadas foram geradas em **Windows/CPU com torch 2.12.1**. No Linux (Docker/CI) o projeto instala os wheels **CPU-only** do PyTorch (`2.13.0+cpu`, fonte `download.pytorch.org/whl/cpu`), o que mantém a imagem em ~850 MB. Os seeds garantem reprodução **exata** dentro da mesma plataforma; entre plataformas (BLAS/versões diferentes) espera-se equivalência estatística, não igualdade bit a bit.
+
 ## 7. Experimentos (MLflow Tracking)
 
 Cada treino loga parâmetros, métricas por época e artefatos no experimento **`recsys-ecommerce`**:
@@ -133,16 +135,15 @@ Cada treino loga parâmetros, métricas por época e artefatos no experimento **
 make mlflow-ui          # UI em http://localhost:5000
 ```
 
-Busca de hiperparâmetros realizada (4 runs de treino, métrica: recall@10 na validação):
+Busca de hiperparâmetros realizada (3 configurações, métrica: recall@10 na validação):
 
-| Run | embedding_dim | learning_rate | hidden_dims | recall@10 (val) |
+| Config | embedding_dim | learning_rate | hidden_dims | recall@10 (val) |
 |---|---|---|---|---|
-| 1 | 32 | 0.001 | — | 0.0781 |
-| 2 | 16 | 0.005 | — | 0.1511 |
+| 1 | 32 | 0.001 | [64, 32] | 0.0781 |
+| 2 | 16 | 0.005 | [64, 32] | 0.1511 |
 | 3 | **64** | **0.005** | **[128, 64]** | **0.1541** ← config final |
-| 4 (repro) | 64 | 0.005 | [128, 64] | 0.1541 (reprodução exata) |
 
-O run 4 reproduziu o resultado do run 3 **exatamente** (0.1541), graças aos seeds determinísticos (`seed=42` propagado para Python/NumPy/PyTorch).
+Além dos 3 runs da busca, o experimento acumula runs de **reprodução** (reexecuções do `dvc repro` após mudanças que invalidam o stage de treino): todas batem o recall **0.1541 exato** da config final, graças aos seeds determinísticos (`seed=42` propagado para Python/NumPy/PyTorch).
 
 ## 8. Model Registry (registro e promoção)
 

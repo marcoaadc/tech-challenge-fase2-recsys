@@ -87,5 +87,5 @@ Seleção de modelo feita por recall@10 na **validação** (melhor run: 0.1541, 
 - **Re-treino completo:** `dvc repro` (ou `make repro`) reexecuta os 5 estágios (download → preprocess → build_features → train → evaluate) apenas onde houver mudança de código, dados ou parâmetros. Hiperparâmetros são editados em `configs/params.yaml`.
 - **Tracking:** todo treino gera um run no experimento MLflow `recsys-ecommerce` (`make mlflow-ui` para inspecionar).
 - **Promoção:** após validar as métricas do novo run, `poetry run python scripts/promote_model.py` registra a nova versão no Registry e a promove (None → Staging → Production).
-- **Reprodutibilidade:** seeds fixos (42) + `poetry.lock` + `dvc.lock` garantem reprodução bit a bit do resultado reportado.
+- **Reprodutibilidade:** seeds fixos (42) + `poetry.lock` + `dvc.lock` garantem reprodução bit a bit do resultado reportado **na mesma plataforma que o gerou** (Windows/CPU, torch 2.12.1). O container Linux usa torch CPU-only (`2.13.0+cpu`); entre plataformas espera-se equivalência estatística, não igualdade exata.
 - **Contato:** Marco (marcoaadc@gmail.com) — Tech Challenge FIAP Fase 02.
